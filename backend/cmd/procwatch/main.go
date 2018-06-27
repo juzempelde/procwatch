@@ -11,3 +11,8 @@ func main() {
 		os.Exit(1)
 	}
 }
+
+// Runner abstracts an application.
+type Runner interface {
+	Run([]string) error
+}
