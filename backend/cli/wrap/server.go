@@ -1,4 +1,4 @@
-package cli
+package wrap
 
 import (
 	"github.com/juzempelde/procwatch/backend/cli"
