@@ -17,7 +17,7 @@ type cliAgent struct {
 }
 
 func (ag *cliAgent) Exec() error {
-	return ag.Exec()
+	return ag.agent.Run()
 }
 
 func (ag *cliAgent) SetServerRPCAddr(addr string) {
