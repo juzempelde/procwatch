@@ -48,23 +48,17 @@ type Devices struct {
 	OnChange func()
 }
 
+func (devices *Devices) withLock(f func()) {
+	devices.lock.Lock()
+	f()
+	devices.lock.Unlock()
+}
+
 func (devices *Devices) addDevice(dev *device) {
 	if devices.byID == nil {
 		devices.byID = map[int]*device{}
 	}
 	devices.byID[dev.internalID] = dev
-}
-
-func (devices *Devices) identify(dev *device, id DeviceID) error {
-	devices.lock.Lock()
-	for _, existingDevice := range devices.byID {
-		if existingDevice.id == id && existingDevice.internalID != dev.internalID && existingDevice.connected {
-			return newAlreadyConnectedError(id)
-		}
-	}
-	dev.id = id
-	devices.lock.Unlock()
-	return nil
 }
 
 // Connect initially connects a device.
@@ -75,7 +69,7 @@ func (devices *Devices) Connect(addr net.Addr) Device {
 		devices:    devices,
 		addr:       addr,
 		internalID: devices.currentInternalID,
-		connected:  true,
+		status:     pending,
 	}
 	devices.addDevice(newDevice)
 	devices.lock.Unlock()
@@ -85,20 +79,84 @@ func (devices *Devices) Connect(addr net.Addr) Device {
 type device struct {
 	devices    *Devices
 	internalID int
+	status     deviceStatus
 
-	addr      net.Addr
-	id        DeviceID
-	connected bool
+	addr net.Addr
+	id   DeviceID
+}
+
+type deviceStatus interface {
+	identify(*Devices, *device, DeviceID) error
+	disconnect(*device) error
 }
 
 func (dev *device) Identify(id DeviceID) error {
-	return dev.devices.identify(dev, id)
+	var err error
+	dev.devices.withLock(
+		func() {
+			err = dev.status.identify(dev.devices, dev, id)
+		},
+	)
+	return err
 }
 
 func (dev *device) Disconnect() error {
-	dev.connected = false
-	return nil
+	var err error
+	dev.devices.withLock(
+		func() {
+			err = dev.status.disconnect(dev)
+		},
+	)
+	return err
 }
 
 // DeviceID is the self-chosen ID of a device.
 type DeviceID string
+
+// statusPending implements deviceStatus and represents a device which is connected, but not yet identified.
+type statusPending struct{}
+
+func (status *statusPending) identify(devs *Devices, dev *device, id DeviceID) error {
+	for _, existingDevice := range devs.byID {
+		if existingDevice.id == id && existingDevice.internalID != dev.internalID && existingDevice.status != disconnected {
+			return newAlreadyConnectedError(id)
+		}
+	}
+	dev.status = connected
+	dev.id = id
+	return nil
+}
+
+func (status *statusPending) disconnect(dev *device) error {
+	dev.status = disconnected
+	return nil
+}
+
+var pending = &statusPending{}
+
+// statusConnected implements deviceStatus and represents a device which is connected and identified.
+type statusConnected struct{}
+
+func (status *statusConnected) identify(*Devices, *device, DeviceID) error {
+	return fmt.Errorf("already identified")
+}
+
+func (status *statusConnected) disconnect(dev *device) error {
+	dev.status = disconnected
+	return nil
+}
+
+var connected = &statusConnected{}
+
+// statusDisconnected implements deviceStatus and represents a device which has disconnected.
+type statusDisconnected struct{}
+
+func (status *statusDisconnected) identify(*Devices, *device, DeviceID) error {
+	return fmt.Errorf("cannot identify after disconnect")
+}
+
+func (status *statusDisconnected) disconnect(*device) error {
+	return fmt.Errorf("already disconnected")
+}
+
+var disconnected = &statusDisconnected{}

@@ -58,3 +58,33 @@ func TestDevicesCanConnectAfterDisconnect(t *testing.T) {
 		t.Errorf("Expected no error, but got %+v", err)
 	}
 }
+
+func TestIdentifyingTwiceIsAnError(t *testing.T) {
+	devices := &procwatch.Devices{}
+	device := devices.Connect(&net.TCPAddr{
+		IP:   net.IP([]byte{10, 1, 0, 150}),
+		Port: 64999,
+	})
+
+	device.Identify(procwatch.DeviceID("foo"))
+	err := device.Identify(procwatch.DeviceID("bar"))
+
+	if err == nil {
+		t.Errorf("Expected an error for identifying device twice")
+	}
+}
+
+func TestIdentifyingAfterDisconnectIsAnError(t *testing.T) {
+	devices := &procwatch.Devices{}
+	device := devices.Connect(&net.TCPAddr{
+		IP:   net.IP([]byte{10, 1, 0, 42}),
+		Port: 33333,
+	})
+	device.Disconnect()
+
+	err := device.Identify(procwatch.DeviceID("xyz"))
+
+	if err == nil {
+		t.Errorf("Expected an error for identifying disconnected device")
+	}
+}
