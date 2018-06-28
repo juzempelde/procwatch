@@ -54,10 +54,3 @@ func (dev *Devices) Connect(addr net.Addr) *Device {
 }
 
 type DeviceID string
-
-type Processes []*Process
-
-type Process struct {
-	Name string
-	PID  int
-}
