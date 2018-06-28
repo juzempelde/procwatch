@@ -2,12 +2,14 @@ package procwatch
 
 import (
 	"fmt"
+	"net"
 	"sync"
 )
 
 type Device struct {
 	List *Devices
 
+	Addr      net.Addr
 	ID        DeviceID
 	Processes Processes
 }
@@ -44,8 +46,11 @@ type Devices struct {
 	OnChange func()
 }
 
-func (dev *Devices) Connect() *Device {
-	return nil
+// Connect initially connects a device.
+func (dev *Devices) Connect(addr net.Addr) *Device {
+	return &Device{
+		Addr: addr,
+	}
 }
 
 type DeviceID string
