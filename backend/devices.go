@@ -9,6 +9,7 @@ import (
 // Device is a device as provided by an agent.
 type Device interface {
 	Identify(id DeviceID) error
+	Disconnect() error
 }
 
 type alreadyConnectedError struct {
@@ -57,7 +58,7 @@ func (devices *Devices) addDevice(dev *device) {
 func (devices *Devices) identify(dev *device, id DeviceID) error {
 	devices.lock.Lock()
 	for _, existingDevice := range devices.byID {
-		if existingDevice.id == id && existingDevice.internalID != dev.internalID {
+		if existingDevice.id == id && existingDevice.internalID != dev.internalID && existingDevice.connected {
 			return newAlreadyConnectedError(id)
 		}
 	}
@@ -74,6 +75,7 @@ func (devices *Devices) Connect(addr net.Addr) Device {
 		devices:    devices,
 		addr:       addr,
 		internalID: devices.currentInternalID,
+		connected:  true,
 	}
 	devices.addDevice(newDevice)
 	devices.lock.Unlock()
@@ -84,12 +86,18 @@ type device struct {
 	devices    *Devices
 	internalID int
 
-	addr net.Addr
-	id   DeviceID
+	addr      net.Addr
+	id        DeviceID
+	connected bool
 }
 
 func (dev *device) Identify(id DeviceID) error {
 	return dev.devices.identify(dev, id)
+}
+
+func (dev *device) Disconnect() error {
+	dev.connected = false
+	return nil
 }
 
 // DeviceID is the self-chosen ID of a device.

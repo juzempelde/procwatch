@@ -29,3 +29,32 @@ func TestCannotIdentifyTheSameDeviceTwice(t *testing.T) {
 		t.Errorf("Expected error to be caused by connecting the same device twice, but got %+v", secondErr)
 	}
 }
+
+func TestDevicesCanConnectAfterDisconnect(t *testing.T) {
+	deviceID := procwatch.DeviceID("foobar")
+
+	devices := &procwatch.Devices{}
+
+	device := devices.Connect(&net.TCPAddr{
+		IP:   net.IP([]byte{10, 1, 0, 200}),
+		Port: 25000,
+	})
+
+	device.Identify(deviceID)
+	err := device.Disconnect()
+
+	if err != nil {
+		t.Errorf("Expected no error, but got %+v", err)
+		return
+	}
+
+	device = devices.Connect(&net.TCPAddr{
+		IP:   net.IP([]byte{10, 1, 0, 200}),
+		Port: 24000,
+	})
+	err = device.Identify(deviceID)
+
+	if err != nil {
+		t.Errorf("Expected no error, but got %+v", err)
+	}
+}
