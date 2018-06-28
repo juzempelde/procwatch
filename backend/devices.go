@@ -6,17 +6,8 @@ import (
 	"sync"
 )
 
-type Device struct {
-	List *Devices
-
-	Addr      net.Addr
-	ID        DeviceID
-	Processes Processes
-}
-
-func (dev *Device) Identify(ID string) error {
-	return nil
-}
+// Device is a device as provided by an agent.
+type Device interface{}
 
 type alreadyConnectedError struct {
 	ID DeviceID
@@ -25,12 +16,6 @@ type alreadyConnectedError struct {
 func (err alreadyConnectedError) Error() string {
 	return fmt.Sprintf("device %s already connected", err.ID)
 }
-
-func (dev *Device) Disconnect() error {
-	return nil
-}
-
-func (dev *Device) SetProcesses(procs Processes) {}
 
 type Devices struct {
 	PendingDevices []*Devices
@@ -47,10 +32,17 @@ type Devices struct {
 }
 
 // Connect initially connects a device.
-func (dev *Devices) Connect(addr net.Addr) *Device {
-	return &Device{
-		Addr: addr,
+func (devices *Devices) Connect(addr net.Addr) Device {
+	return &device{
+		devices: devices,
+		addr:    addr,
 	}
+}
+
+type device struct {
+	devices *Devices
+
+	addr net.Addr
 }
 
 type DeviceID string
