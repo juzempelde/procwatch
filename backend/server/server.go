@@ -2,9 +2,10 @@ package server
 
 import (
 	procwatch "github.com/juzempelde/procwatch/backend"
+	pwRPC "github.com/juzempelde/procwatch/backend/rpc"
 
+	"fmt"
 	"net"
-	"net/rpc"
 )
 
 // Server accepts RPC connections by agents.
@@ -18,7 +19,6 @@ type Server struct {
 
 // Run starts the RPC server.
 func (server *Server) Run() error {
-	rpcServer := server.createRPCServer()
 	listener, err := net.Listen("tcp", server.RPCAddr)
 	if err != nil {
 		return err
@@ -26,18 +26,17 @@ func (server *Server) Run() error {
 	for {
 		conn, err := listener.Accept()
 		if err != nil {
-			// What to do here?
+			fmt.Printf("Accept error: %+v\n", err)
+			// TODO: Better error handling
 			continue
 		}
-		go rpcServer.ServeConn(conn) // TODO: Shutdown
+		fmt.Printf("Connection from %s\n", conn.RemoteAddr())
+		device := server.Devices.Connect(conn.RemoteAddr())
+		go pwRPC.NewServer(device).ServeConn(conn) // TODO: Shutdown
 	}
 }
 
-func (server *Server) createRPCServer() *rpc.Server {
-	rpcServer := rpc.NewServer()
-	return rpcServer
-}
-
+// Devices abstracts procwatch.Devices.
 type Devices interface {
 	Connect(addr net.Addr) procwatch.Device
 }

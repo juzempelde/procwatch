@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/juzempelde/procwatch/backend"
 	"github.com/juzempelde/procwatch/backend/agent"
 	"github.com/juzempelde/procwatch/backend/cli"
 	"github.com/juzempelde/procwatch/backend/cli/wrap"
@@ -13,7 +14,11 @@ func createApp() Runner {
 			func() cli.Agent {
 				return wrap.Agent(&agent.Agent{})
 			}, func() cli.Server {
-				return wrap.Server(&server.Server{})
+				return wrap.Server(
+					&server.Server{
+						Devices: &procwatch.Devices{},
+					},
+				)
 			},
 		),
 	)
