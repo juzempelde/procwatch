@@ -13,7 +13,7 @@ func (dev *Device) Identify(id procwatch.DeviceID) error {
 	if dev.IdentifyErrors == nil {
 		return nil
 	}
-	return dev.Identify(id)
+	return dev.IdentifyErrors[id]
 }
 
 func (dev *Device) Disconnect() error {
