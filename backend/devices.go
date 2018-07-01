@@ -8,7 +8,10 @@ import (
 
 // Device is a device as provided by an agent.
 type Device interface {
+	// Identify identifies the device with an error. Returns an error if the device already is connected.
 	Identify(id DeviceID) error
+
+	// Disconnects the device.
 	Disconnect() error
 }
 
