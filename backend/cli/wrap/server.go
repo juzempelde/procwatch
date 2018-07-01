@@ -8,7 +8,7 @@ import (
 // Server wraps a server into something the CLI package can use.
 func Server(srv *server.Server) cli.Server {
 	return &cliServer{
-		server: &server.Server{},
+		server: srv,
 	}
 }
 
