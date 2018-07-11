@@ -6,6 +6,9 @@ procwatch:
 test:
 	go test ./backend/...
 
+test-cover:
+	go test -cover ./backend/...
+
 .PHONY: \
 	procwatch \
 	test
