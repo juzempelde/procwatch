@@ -6,8 +6,8 @@ import (
 	"fmt"
 )
 
-func ExampleProcessNameFilter_Apply() {
-	filter := procwatch.ProcessNameFilter{
+func ExampleProcesses_Filtered() {
+	byNames := procwatch.ProcessFilterNameList{
 		"foo",
 		"bar",
 	}
@@ -29,7 +29,7 @@ func ExampleProcessNameFilter_Apply() {
 			PID:  666,
 		},
 	}
-	filteredProcesses := filter.Apply(processes).SortBy(procwatch.AscendingProcessNames)
+	filteredProcesses := processes.Filtered(byNames).SortBy(procwatch.AscendingProcessNames)
 	for _, proc := range filteredProcesses {
 		fmt.Printf("%05d %s\n", proc.PID, proc.Name)
 	}

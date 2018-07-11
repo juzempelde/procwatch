@@ -11,16 +11,26 @@ type Process struct {
 	PID  int
 }
 
-type ProcessNameFilter []string
+type ProcessFilter interface {
+	Allows(proc *Process) bool
+}
 
-func (filter ProcessNameFilter) Apply(procs Processes) Processes {
+type ProcessFilterNameList []string
+
+func (filter ProcessFilterNameList) Allows(proc *Process) bool {
+	for _, allowedName := range filter {
+		if proc.Name == allowedName {
+			return true
+		}
+	}
+	return false
+}
+
+func (procs Processes) Filtered(filter ProcessFilter) Processes {
 	filteredProcs := Processes{}
 	for _, proc := range procs {
-		for _, allowedName := range filter {
-			if proc.Name == allowedName {
-				filteredProcs = append(filteredProcs, proc)
-				break
-			}
+		if filter.Allows(proc) {
+			filteredProcs = append(filteredProcs, proc)
 		}
 	}
 	return filteredProcs
