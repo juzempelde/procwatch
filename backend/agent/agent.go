@@ -5,19 +5,19 @@ import (
 	"github.com/juzempelde/procwatch/backend/rpc"
 
 	"net"
-	"os"
 	"time"
 )
 
 // Agent runs procwatch as an agent.
 type Agent struct {
-	ServerRPCAddr string
-	ProcessList   ProcessList
+	ServerRPCAddr  string
+	ProcessList    ProcessList
+	HostIDProvider HostIDProvider
 }
 
 // Run connects to the server's address via RPC, registers its ID and sends process informations.
 func (agent *Agent) Run() error {
-	hostID, err := os.Hostname()
+	hostID, err := agent.HostIDProvider.HostID()
 	if err != nil {
 		return err
 	}
@@ -57,5 +57,15 @@ type ProcessList interface {
 type ProcessListFunc func() (procwatch.Processes, error)
 
 func (f ProcessListFunc) Current() (procwatch.Processes, error) {
+	return f()
+}
+
+type HostIDProvider interface {
+	HostID() (string, error)
+}
+
+type HostIDProviderFunc func() (string, error)
+
+func (f HostIDProviderFunc) HostID() (string, error) {
 	return f()
 }

@@ -7,6 +7,8 @@ import (
 	"github.com/juzempelde/procwatch/backend/cli/wrap"
 	"github.com/juzempelde/procwatch/backend/ps"
 	"github.com/juzempelde/procwatch/backend/server"
+
+	"os"
 )
 
 func createApp() Runner {
@@ -15,7 +17,8 @@ func createApp() Runner {
 			func() cli.Agent {
 				return wrap.Agent(
 					&agent.Agent{
-						ProcessList: agent.ProcessListFunc(ps.CurrentProcesses),
+						ProcessList:    agent.ProcessListFunc(ps.CurrentProcesses),
+						HostIDProvider: agent.HostIDProviderFunc(os.Hostname),
 					},
 				)
 			}, func() cli.Server {
