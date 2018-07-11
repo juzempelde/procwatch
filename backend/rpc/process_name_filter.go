@@ -14,3 +14,5 @@ type ProcessNameFilterRequest struct{}
 type ProcessNameFilterResponse struct {
 	Names []string
 }
+
+const processFilter = "processFilter"
