@@ -10,5 +10,6 @@ import (
 func NewServer(device procwatch.Device) *rpc.Server {
 	srv := rpc.NewServer()
 	srv.RegisterName(identificator, &DeviceIdentification{Device: device})
+	srv.RegisterName(processFilter, &ProcessNameFilter{Names: make([]string, 0)})
 	return srv
 }
