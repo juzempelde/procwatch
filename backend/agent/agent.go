@@ -25,7 +25,13 @@ func (agent *Agent) Run() error {
 	}
 	rpcClient := rpc.NewClient(conn)
 	defer rpcClient.Close() // TODO: Handle close error
+
 	err = rpcClient.Identify(procwatch.DeviceID(hostID))
+	if err != nil {
+		return err
+	}
+
+	_, err = rpcClient.ProcessNames()
 	if err != nil {
 		return err
 	}
