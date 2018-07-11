@@ -13,14 +13,11 @@ func CurrentProcesses() (procwatch.Processes, error) {
 		return nil, err
 	}
 	procs := make(procwatch.Processes, len(psProcs))
-	for _, psProc := range psProcs {
-		procs = append(
-			procs,
-			&procwatch.Process{
-				PID:  psProc.Pid(),
-				Name: psProc.Executable(),
-			},
-		)
+	for index, psProc := range psProcs {
+		procs[index] = &procwatch.Process{
+			PID:  psProc.Pid(),
+			Name: psProc.Executable(),
+		}
 	}
 	return procs, nil
 }
