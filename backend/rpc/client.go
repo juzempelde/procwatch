@@ -49,6 +49,14 @@ func (client *Client) ProcessNamesFilter() (procwatch.ProcessFilterNameList, err
 	return procwatch.ProcessFilterNameList(response.Names), nil
 }
 
+func (client *Client) Processes(procs procwatch.Processes) error {
+	request := ProcessesRequest{
+		Processes: procs,
+	}
+	response := &ProcessesResponse{}
+	return client.caller.Call(fmt.Sprintf("%s.%s", processes, "Processes"), request, response)
+}
+
 func (client *Client) Close() error {
 	return client.caller.Close()
 }

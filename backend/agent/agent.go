@@ -43,7 +43,7 @@ func (agent *Agent) Run() error {
 		if err != nil {
 			continue
 		}
-		processes = processes.Filtered(processNamesFilter)
+		rpcClient.Processes(processes.Filtered(processNamesFilter))
 		time.Sleep(sleepInterval)
 	}
 }
