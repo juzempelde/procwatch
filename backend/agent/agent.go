@@ -18,29 +18,30 @@ type Agent struct {
 // Run connects to the server's address via RPC, registers its ID and sends process informations.
 func (ag *Agent) Run() error {
 	return (&agent{
-		ServerRPCAddr:  ag.ServerRPCAddr,
+		Connector: &RPCConnector{
+			ServerRPCAddr: ag.ServerRPCAddr,
+		},
 		ProcessList:    ag.ProcessList,
 		HostIDProvider: ag.HostIDProvider,
 	}).Run()
 }
 
 type agent struct {
-	ServerRPCAddr  string
+	Connector      Connector
 	ProcessList    ProcessList
 	HostIDProvider HostIDProvider
 }
 
 func (agent *agent) Run() error {
-
 	hostID, err := agent.HostIDProvider.HostID()
 	if err != nil {
 		return err
 	}
-	conn, err := net.Dial("tcp", agent.ServerRPCAddr)
+
+	rpcClient, err := agent.Connector.Connect()
 	if err != nil {
 		return err
 	}
-	rpcClient := rpc.NewClient(conn)
 	defer rpcClient.Close() // TODO: Handle close error
 
 	err = rpcClient.Identify(procwatch.DeviceID(hostID))
@@ -83,4 +84,20 @@ type HostIDProviderFunc func() (string, error)
 
 func (f HostIDProviderFunc) HostID() (string, error) {
 	return f()
+}
+
+type Connector interface {
+	Connect() (*rpc.Client, error)
+}
+
+type RPCConnector struct {
+	ServerRPCAddr string
+}
+
+func (connector *RPCConnector) Connect() (*rpc.Client, error) {
+	conn, err := net.Dial("tcp", connector.ServerRPCAddr)
+	if err != nil {
+		return nil, err
+	}
+	return rpc.NewClient(conn), nil
 }
