@@ -7,13 +7,12 @@ import (
 	"net"
 	"os"
 	"time"
-
-	"github.com/mitchellh/go-ps"
 )
 
 // Agent runs procwatch as an agent.
 type Agent struct {
 	ServerRPCAddr string
+	ProcessList   ProcessList
 }
 
 // Run connects to the server's address via RPC, registers its ID and sends process informations.
@@ -40,7 +39,7 @@ func (agent *Agent) Run() error {
 	}
 
 	for {
-		processes, err := processes()
+		processes, err := agent.ProcessList.Current()
 		if err != nil {
 			continue
 		}
@@ -51,20 +50,12 @@ func (agent *Agent) Run() error {
 
 const sleepInterval = time.Second
 
-func processes() (procwatch.Processes, error) {
-	psProcs, err := ps.Processes()
-	if err != nil {
-		return nil, err
-	}
-	procs := make(procwatch.Processes, len(psProcs))
-	for _, psProc := range psProcs {
-		procs = append(
-			procs,
-			&procwatch.Process{
-				PID:  psProc.Pid(),
-				Name: psProc.Executable(),
-			},
-		)
-	}
-	return procs, nil
+type ProcessList interface {
+	Current() (procwatch.Processes, error)
+}
+
+type ProcessListFunc func() (procwatch.Processes, error)
+
+func (f ProcessListFunc) Current() (procwatch.Processes, error) {
+	return f()
 }
