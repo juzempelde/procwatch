@@ -87,17 +87,24 @@ func (f HostIDProviderFunc) HostID() (string, error) {
 }
 
 type Connector interface {
-	Connect() (*rpc.Client, error)
+	Connect() (Client, error)
 }
 
 type RPCConnector struct {
 	ServerRPCAddr string
 }
 
-func (connector *RPCConnector) Connect() (*rpc.Client, error) {
+func (connector *RPCConnector) Connect() (Client, error) {
 	conn, err := net.Dial("tcp", connector.ServerRPCAddr)
 	if err != nil {
 		return nil, err
 	}
 	return rpc.NewClient(conn), nil
+}
+
+type Client interface {
+	Close() error
+	Identify(id procwatch.DeviceID) error
+	ProcessNamesFilter() (procwatch.ProcessFilterNameList, error)
+	Processes(procs procwatch.Processes) error
 }
