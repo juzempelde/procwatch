@@ -34,18 +34,37 @@ func (agent *Agent) Run() error {
 		return err
 	}
 
-	_, err = rpcClient.ProcessNames()
+	processNamesFilter, err := rpcClient.ProcessNamesFilter()
 	if err != nil {
 		return err
 	}
 
 	for {
-		_, err := ps.Processes()
+		processes, err := processes()
 		if err != nil {
 			continue
 		}
+		processes = processes.Filtered(processNamesFilter)
 		time.Sleep(sleepInterval)
 	}
 }
 
 const sleepInterval = time.Second
+
+func processes() (procwatch.Processes, error) {
+	psProcs, err := ps.Processes()
+	if err != nil {
+		return nil, err
+	}
+	procs := make(procwatch.Processes, len(psProcs))
+	for _, psProc := range psProcs {
+		procs = append(
+			procs,
+			&procwatch.Process{
+				PID:  psProc.Pid(),
+				Name: psProc.Executable(),
+			},
+		)
+	}
+	return procs, nil
+}

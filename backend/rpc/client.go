@@ -39,14 +39,14 @@ func (client *Client) Identify(id procwatch.DeviceID) error {
 	return nil
 }
 
-func (client *Client) ProcessNames() ([]string, error) {
+func (client *Client) ProcessNamesFilter() (procwatch.ProcessFilterNameList, error) {
 	request := ProcessNameFilterRequest{}
 	response := &ProcessNameFilterResponse{}
 	err := client.caller.Call(fmt.Sprintf("%s.%s", processFilter, "ProcessNames"), request, response)
 	if err != nil {
 		return nil, err
 	}
-	return response.Names, nil
+	return procwatch.ProcessFilterNameList(response.Names), nil
 }
 
 func (client *Client) Close() error {
