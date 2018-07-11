@@ -6,6 +6,9 @@ import (
 
 	"net"
 	"os"
+	"time"
+
+	"github.com/mitchellh/go-ps"
 )
 
 // Agent runs procwatch as an agent.
@@ -36,5 +39,13 @@ func (agent *Agent) Run() error {
 		return err
 	}
 
-	return nil
+	for {
+		_, err := ps.Processes()
+		if err != nil {
+			continue
+		}
+		time.Sleep(sleepInterval)
+	}
 }
+
+const sleepInterval = time.Second
