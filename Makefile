@@ -1,7 +1,7 @@
 all: procwatch
 
 procwatch:
-	go build ./backend/cmd/procwatch
+	go build -o procwatch ./backend/cmd/procwatch
 
 test:
 	go test ./backend/...
