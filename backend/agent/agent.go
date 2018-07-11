@@ -16,7 +16,22 @@ type Agent struct {
 }
 
 // Run connects to the server's address via RPC, registers its ID and sends process informations.
-func (agent *Agent) Run() error {
+func (ag *Agent) Run() error {
+	return (&agent{
+		ServerRPCAddr:  ag.ServerRPCAddr,
+		ProcessList:    ag.ProcessList,
+		HostIDProvider: ag.HostIDProvider,
+	}).Run()
+}
+
+type agent struct {
+	ServerRPCAddr  string
+	ProcessList    ProcessList
+	HostIDProvider HostIDProvider
+}
+
+func (agent *agent) Run() error {
+
 	hostID, err := agent.HostIDProvider.HostID()
 	if err != nil {
 		return err
