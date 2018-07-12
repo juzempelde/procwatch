@@ -17,8 +17,8 @@ func createApp() Runner {
 			func() cli.Agent {
 				return wrap.Agent(
 					&agent.Agent{
-						ProcessList:    agent.ProcessListFunc(ps.CurrentProcesses),
-						HostIDProvider: agent.HostIDProviderFunc(os.Hostname),
+						ProcessList:    procwatch.ProcessListFunc(ps.CurrentProcesses),
+						HostIDProvider: procwatch.HostIDProviderFunc(os.Hostname),
 					},
 				)
 			}, func() cli.Server {
