@@ -16,18 +16,18 @@ func (agent *Agent) Run() error {
 		return err
 	}
 
-	rpcClient, err := agent.Connector.Connect()
+	client, err := agent.Connector.Connect()
 	if err != nil {
 		return err
 	}
-	defer rpcClient.Close() // TODO: Handle close error
+	defer client.Close() // TODO: Handle close error
 
-	err = rpcClient.Identify(DeviceID(hostID))
+	err = client.Identify(DeviceID(hostID))
 	if err != nil {
 		return err
 	}
 
-	processNamesFilter, err := rpcClient.ProcessNamesFilter()
+	processNamesFilter, err := client.ProcessNamesFilter()
 	if err != nil {
 		return err
 	}
@@ -37,7 +37,7 @@ func (agent *Agent) Run() error {
 		if err != nil {
 			continue
 		}
-		rpcClient.Processes(processes.Filtered(processNamesFilter))
+		client.Processes(processes.Filtered(processNamesFilter))
 		time.Sleep(sleepInterval)
 	}
 }
