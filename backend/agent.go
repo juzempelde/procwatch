@@ -8,6 +8,7 @@ type Agent struct {
 	Connector      Connector
 	ProcessList    ProcessList
 	HostIDProvider HostIDProvider
+	ErrorHandler func(error)
 }
 
 func (agent *Agent) Run() error {
@@ -39,6 +40,12 @@ func (agent *Agent) Run() error {
 		}
 		client.Processes(processes.Filtered(processNamesFilter))
 		time.Sleep(sleepInterval)
+	}
+}
+
+func (agent *Agent) handleError(err error) {
+	if handle := agent.ErrorHandler; handle != nil {
+		handle(err)
 	}
 }
 
