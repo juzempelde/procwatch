@@ -8,38 +8,55 @@ type Agent struct {
 	Connector      Connector
 	ProcessList    ProcessList
 	HostIDProvider HostIDProvider
-	ErrorHandler func(error)
+	ErrorHandler   func(error)
 }
 
 func (agent *Agent) Run() error {
-	hostID, err := agent.HostIDProvider.HostID()
-	if err != nil {
-		return err
-	}
-
-	client, err := agent.Connector.Connect()
-	if err != nil {
-		return err
-	}
-	defer client.Close() // TODO: Handle close error
-
-	err = client.Identify(DeviceID(hostID))
-	if err != nil {
-		return err
-	}
-
-	processNamesFilter, err := client.ProcessNamesFilter()
-	if err != nil {
-		return err
+	hostID := ""
+	var err error
+	for {
+		hostID, err = agent.HostIDProvider.HostID()
+		if err != nil {
+			agent.handleError(err)
+			time.Sleep(sleepInterval)
+		}
 	}
 
 	for {
-		processes, err := agent.ProcessList.Current()
+		var client Client
+		client, err = agent.Connector.Connect()
 		if err != nil {
+			agent.handleError(err)
+			time.Sleep(sleepInterval)
 			continue
 		}
-		client.Processes(processes.Filtered(processNamesFilter))
-		time.Sleep(sleepInterval)
+		defer client.Close() // TODO: Handle close error
+
+		for {
+			err := client.Identify(DeviceID(hostID))
+			if err != nil {
+				agent.handleError(err)
+				time.Sleep(sleepInterval)
+			}
+		}
+
+		for {
+			processNamesFilter, err := client.ProcessNamesFilter()
+			if err != nil {
+				agent.handleError(err)
+				time.Sleep(sleepInterval)
+				continue
+			}
+
+			processes, err := agent.ProcessList.Current()
+			if err != nil {
+				agent.handleError(err)
+				time.Sleep(sleepInterval)
+				continue
+			}
+			agent.handleError(client.Processes(processes.Filtered(processNamesFilter)))
+			time.Sleep(sleepInterval)
+		}
 	}
 }
 
