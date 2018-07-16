@@ -4,6 +4,7 @@ import (
 	"github.com/juzempelde/procwatch/backend"
 	"github.com/juzempelde/procwatch/backend/rpc"
 
+	"fmt"
 	"net"
 )
 
@@ -22,6 +23,9 @@ func (ag *Agent) Run() error {
 		},
 		ProcessList:    ag.ProcessList,
 		HostIDProvider: ag.HostIDProvider,
+		ErrorHandler: func(err error) {
+			fmt.Printf("Error: %+v\n", err)
+		},
 	}).Run()
 }
 
