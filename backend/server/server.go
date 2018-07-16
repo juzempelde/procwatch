@@ -13,8 +13,6 @@ import (
 type Server struct {
 	RPCAddr string
 
-	listener net.Listener
-
 	Devices Devices
 }
 
