@@ -3,6 +3,7 @@ package rpc
 import (
 	"github.com/juzempelde/procwatch/backend"
 
+	"context"
 	"fmt"
 	"io"
 	"net/rpc"
@@ -24,7 +25,7 @@ func NewClient(conn io.ReadWriteCloser) *Client {
 	}
 }
 
-func (client *Client) Identify(id procwatch.DeviceID) error {
+func (client *Client) Identify(ctx context.Context, id procwatch.DeviceID) error {
 	request := &IdentificationRequest{
 		ID: id,
 	}
@@ -39,7 +40,7 @@ func (client *Client) Identify(id procwatch.DeviceID) error {
 	return nil
 }
 
-func (client *Client) ProcessNamesFilter() (procwatch.ProcessFilterNameList, error) {
+func (client *Client) ProcessNamesFilter(ctx context.Context) (procwatch.ProcessFilterNameList, error) {
 	request := ProcessNameFilterRequest{}
 	response := &ProcessNameFilterResponse{}
 	err := client.caller.Call(fmt.Sprintf("%s.%s", processFilter, "Expose"), request, response)
@@ -49,7 +50,7 @@ func (client *Client) ProcessNamesFilter() (procwatch.ProcessFilterNameList, err
 	return procwatch.ProcessFilterNameList(response.Names), nil
 }
 
-func (client *Client) Processes(procs procwatch.Processes) error {
+func (client *Client) Processes(ctx context.Context, procs procwatch.Processes) error {
 	request := ProcessesRequest{
 		Processes: procs,
 	}

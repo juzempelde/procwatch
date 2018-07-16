@@ -7,6 +7,7 @@ import (
 	"github.com/juzempelde/procwatch/backend/mock"
 	"github.com/juzempelde/procwatch/backend/rpc"
 
+	"context"
 	"net"
 	"sync"
 	"testing"
@@ -26,7 +27,7 @@ func TestSuccessfulIdentification(t *testing.T) {
 	time.Sleep(time.Millisecond)
 	client := rpc.NewClient(clientConn)
 
-	err = client.Identify(procwatch.DeviceID("xyz"))
+	err = client.Identify(context.TODO(), procwatch.DeviceID("xyz"))
 
 	if err != nil {
 		t.Errorf("Expected no error, but got %+v", err)
@@ -46,7 +47,7 @@ func TestFailingIdentification(t *testing.T) {
 	time.Sleep(time.Millisecond)
 	client := rpc.NewClient(clientConn)
 
-	err = client.Identify(procwatch.DeviceID("abc"))
+	err = client.Identify(context.TODO(), procwatch.DeviceID("abc"))
 
 	if err == nil {
 		t.Errorf("Expected error")

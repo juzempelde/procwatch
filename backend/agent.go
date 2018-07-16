@@ -1,6 +1,7 @@
 package procwatch
 
 import (
+	"context"
 	"time"
 )
 
@@ -33,7 +34,7 @@ func (agent *Agent) Run() error {
 		defer client.Close() // TODO: Handle close error
 
 		for {
-			err := client.Identify(DeviceID(hostID))
+			err := client.Identify(context.TODO(), DeviceID(hostID))
 			if err != nil {
 				agent.handleError(err)
 				time.Sleep(sleepInterval)
@@ -41,7 +42,7 @@ func (agent *Agent) Run() error {
 		}
 
 		for {
-			processNamesFilter, err := client.ProcessNamesFilter()
+			processNamesFilter, err := client.ProcessNamesFilter(context.TODO())
 			if err != nil {
 				agent.handleError(err)
 				time.Sleep(sleepInterval)
@@ -54,7 +55,7 @@ func (agent *Agent) Run() error {
 				time.Sleep(sleepInterval)
 				continue
 			}
-			agent.handleError(client.Processes(processes.Filtered(processNamesFilter)))
+			agent.handleError(client.Processes(context.TODO(), processes.Filtered(processNamesFilter)))
 			time.Sleep(sleepInterval)
 		}
 	}
@@ -94,7 +95,7 @@ type Connector interface {
 
 type Client interface {
 	Close() error
-	Identify(id DeviceID) error
-	ProcessNamesFilter() (ProcessFilterNameList, error)
-	Processes(procs Processes) error
+	Identify(ctx context.Context, id DeviceID) error
+	ProcessNamesFilter(ctx context.Context) (ProcessFilterNameList, error)
+	Processes(ctx context.Context, procs Processes) error
 }
