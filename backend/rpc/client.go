@@ -42,7 +42,16 @@ func NewClient(conn io.ReadWriteCloser) *Client {
 	return client
 }
 
+func (client *Client) setDeadlineFromContext(ctx context.Context) error {
+	deadline, ok := ctx.Deadline()
+	if !ok {
+		return nil
+	}
+	return client.deadlineAcceptor.SetDeadline(deadline)
+}
+
 func (client *Client) Identify(ctx context.Context, id procwatch.DeviceID) error {
+	client.setDeadlineFromContext(ctx)
 	request := &IdentificationRequest{
 		ID: id,
 	}
@@ -58,6 +67,7 @@ func (client *Client) Identify(ctx context.Context, id procwatch.DeviceID) error
 }
 
 func (client *Client) ProcessNamesFilter(ctx context.Context) (procwatch.ProcessFilterNameList, error) {
+	client.setDeadlineFromContext(ctx)
 	request := ProcessNameFilterRequest{}
 	response := &ProcessNameFilterResponse{}
 	err := client.caller.Call(fmt.Sprintf("%s.%s", processFilter, "Expose"), request, response)
@@ -68,6 +78,7 @@ func (client *Client) ProcessNamesFilter(ctx context.Context) (procwatch.Process
 }
 
 func (client *Client) Processes(ctx context.Context, procs procwatch.Processes) error {
+	client.setDeadlineFromContext(ctx)
 	request := ProcessesRequest{
 		Processes: procs,
 	}
