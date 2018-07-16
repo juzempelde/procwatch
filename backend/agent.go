@@ -35,14 +35,11 @@ func (agent *Agent) Run() error {
 		}
 		defer client.Close() // TODO: Handle close error
 
-		for {
-			err := client.Identify(context.TODO(), DeviceID(hostID))
-			if err != nil {
-				agent.handleError(err)
-				time.Sleep(sleepInterval)
-			} else {
-				break
-			}
+		err = client.Identify(context.TODO(), DeviceID(hostID))
+		if err != nil {
+			agent.handleError(err)
+			time.Sleep(sleepInterval)
+			continue
 		}
 
 		for {
