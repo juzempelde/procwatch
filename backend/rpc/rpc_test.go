@@ -21,7 +21,7 @@ func TestSuccessfulIdentification(t *testing.T) {
 	}
 	defer serverConn.Close()
 	defer clientConn.Close()
-	server := rpc.NewServer(&mock.Device{})
+	server := rpc.NewServer(&mock.Device{}, nopRefreshDeadline)
 	go server.ServeConn(serverConn)
 
 	time.Sleep(time.Millisecond)
@@ -41,7 +41,7 @@ func TestFailingIdentification(t *testing.T) {
 	}
 	defer serverConn.Close()
 	defer clientConn.Close()
-	server := rpc.NewServer(&mock.Device{IdentifyErrors: map[procwatch.DeviceID]error{"abc": fmt.Errorf("not possible")}})
+	server := rpc.NewServer(&mock.Device{IdentifyErrors: map[procwatch.DeviceID]error{"abc": fmt.Errorf("not possible")}}, nopRefreshDeadline)
 	go server.ServeConn(serverConn)
 
 	time.Sleep(time.Millisecond)
@@ -87,4 +87,8 @@ func connect() (net.Conn, net.Conn, error) {
 	}
 
 	return acceptConn, dialConn, nil
+}
+
+func nopRefreshDeadline() error {
+	return nil
 }

@@ -6,6 +6,7 @@ import (
 
 	"fmt"
 	"net"
+	"time"
 )
 
 // Server accepts RPC connections by agents.
@@ -32,7 +33,7 @@ func (server *Server) Run() error {
 		}
 		fmt.Printf("Connection from %s\n", conn.RemoteAddr())
 		device := server.Devices.Connect(conn.RemoteAddr())
-		go pwRPC.NewServer(device).ServeConn(conn) // TODO: Shutdown
+		go pwRPC.NewServer(device, pwRPC.RefreshDeadlineByTimeout(time.Now, 5*time.Second, conn.SetDeadline)).ServeConn(conn) // TODO: Shutdown
 	}
 }
 

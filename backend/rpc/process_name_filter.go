@@ -1,10 +1,12 @@
 package rpc
 
 type ProcessNameFilter struct {
-	Names []string
+	Names           []string
+	RefreshDeadline RefreshDeadlineFunc
 }
 
 func (procs *ProcessNameFilter) Expose(request ProcessNameFilterRequest, response *ProcessNameFilterResponse) error {
+	refreshDeadline(procs.RefreshDeadline)
 	response.Names = procs.Names
 	return nil
 }

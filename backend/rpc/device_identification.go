@@ -5,10 +5,12 @@ import (
 )
 
 type DeviceIdentification struct {
-	Device procwatch.Device
+	Device          procwatch.Device
+	RefreshDeadline RefreshDeadlineFunc
 }
 
 func (rpc *DeviceIdentification) Identify(request *IdentificationRequest, response *IdentificationResponse) error {
+	refreshDeadline(rpc.RefreshDeadline)
 	err := rpc.Device.Identify(request.ID)
 	if err != nil {
 		response.ErrReason = err.Error()

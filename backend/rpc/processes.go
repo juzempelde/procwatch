@@ -4,9 +4,12 @@ import (
 	"github.com/juzempelde/procwatch/backend"
 )
 
-type Processes struct{}
+type Processes struct {
+	RefreshDeadline RefreshDeadlineFunc
+}
 
 func (procs *Processes) Processes(request ProcessesRequest, response *ProcessesResponse) error {
+	refreshDeadline(procs.RefreshDeadline)
 	return nil
 }
 
