@@ -66,6 +66,9 @@ func (agent *Agent) Run() error {
 }
 
 func (agent *Agent) handleError(err error) {
+	if err == nil {
+		return
+	}
 	if handle := agent.ErrorHandler; handle != nil {
 		handle(err)
 	}
