@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"net/rpc"
+	"time"
 )
 
 // caller abstracts away a net/rpc client.
@@ -17,12 +18,28 @@ type caller interface {
 
 type Client struct {
 	caller caller
+	deadlineAcceptor deadlineAcceptor
+}
+
+type deadlineAcceptor interface {
+	SetDeadline(t time.Time) error
+}
+
+type nopDeadlineAcceptor struct {}
+
+func (acc nopDeadlineAcceptor) SetDeadline(t time.Time) error {
+	return nil
 }
 
 func NewClient(conn io.ReadWriteCloser) *Client {
-	return &Client{
+	client := &Client{
 		caller: rpc.NewClient(conn),
+		deadlineAcceptor: nopDeadlineAcceptor{},
 	}
+	if da, ok := conn.(deadlineAcceptor); ok {
+		client.deadlineAcceptor = da
+	}
+	return client
 }
 
 func (client *Client) Identify(ctx context.Context, id procwatch.DeviceID) error {
