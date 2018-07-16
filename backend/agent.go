@@ -49,15 +49,13 @@ func (agent *Agent) Run() error {
 			processNamesFilter, err := client.ProcessNamesFilter(context.TODO())
 			if err != nil {
 				agent.handleError(err)
-				time.Sleep(sleepInterval)
-				continue
+				break
 			}
 
 			processes, err := agent.ProcessList.Current()
 			if err != nil {
 				agent.handleError(err)
-				time.Sleep(sleepInterval)
-				continue
+				break
 			}
 			agent.handleError(client.Processes(context.TODO(), processes.Filtered(processNamesFilter)))
 			time.Sleep(sleepInterval)
