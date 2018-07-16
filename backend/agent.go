@@ -20,6 +20,8 @@ func (agent *Agent) Run() error {
 		if err != nil {
 			agent.handleError(err)
 			time.Sleep(sleepInterval)
+		} else {
+			break
 		}
 	}
 
