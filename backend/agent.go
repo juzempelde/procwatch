@@ -24,7 +24,7 @@ func (agent *Agent) Run() error {
 	}
 
 	for {
-		var client Client
+		var client AgentClient
 		client, err = agent.Connector.Connect()
 		if err != nil {
 			agent.handleError(err)
@@ -90,10 +90,10 @@ func (f HostIDProviderFunc) HostID() (string, error) {
 }
 
 type Connector interface {
-	Connect() (Client, error)
+	Connect() (AgentClient, error)
 }
 
-type Client interface {
+type AgentClient interface {
 	Close() error
 	Identify(ctx context.Context, id DeviceID) error
 	ProcessNamesFilter(ctx context.Context) (ProcessFilterNameList, error)

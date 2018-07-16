@@ -29,7 +29,7 @@ type RPCConnector struct {
 	ServerRPCAddr string
 }
 
-func (connector *RPCConnector) Connect() (procwatch.Client, error) {
+func (connector *RPCConnector) Connect() (procwatch.AgentClient, error) {
 	conn, err := net.Dial("tcp", connector.ServerRPCAddr)
 	if err != nil {
 		return nil, err
