@@ -10,8 +10,6 @@ import (
 	"time"
 )
 
-const defaultTimeout = time.Second
-
 // caller abstracts away a net/rpc client.
 type caller interface {
 	Call(serviceMethod string, args interface{}, reply interface{}) error
@@ -75,23 +73,6 @@ func (client *Client) Processes(ctx context.Context, procs procwatch.Processes) 
 	}
 	response := &ProcessesResponse{}
 	return client.caller.Call(fmt.Sprintf("%s.%s", processes, "Processes"), request, response)
-}
-
-func (client *Client) timeout(ctx context.Context, op func() error) error {
-	ctx, cancelFunc := context.WithDeadline(ctx, time.Now().Add(defaultTimeout))
-	opFinished := make(chan struct{})
-	var opErr error
-	go func() {
-		opErr = op()
-		close(opFinished)
-	}()
-	select {
-	case <-ctx.Done():
-		return ctx.Err()
-	case <-opFinished:
-		cancelFunc()
-		return opErr
-	}
 }
 
 func (client *Client) Close() error {
