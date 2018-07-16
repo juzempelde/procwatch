@@ -24,7 +24,9 @@ func createApp() Runner {
 			}, func() cli.Server {
 				return wrap.Server(
 					&server.Server{
-						Devices: &procwatch.Devices{},
+						Server: &procwatch.Server{
+							Devices: &procwatch.Devices{},
+						},
 					},
 				)
 			},
