@@ -17,7 +17,7 @@ func TestAgentClientWithDeadlinePassesClose(t *testing.T) {
 				return fmt.Errorf("close failed")
 			},
 		},
-		time.Microsecond,
+		time.Millisecond,
 	)
 
 	err := client.Close()
@@ -35,7 +35,7 @@ func TestAgentClientWithDeadlinePassesProcessNamesFilter(t *testing.T) {
 				return returnedList, nil
 			},
 		},
-		time.Microsecond,
+		time.Millisecond,
 	)
 
 	list, err := client.ProcessNamesFilter(context.Background())
@@ -57,7 +57,7 @@ func TestAgentClientWithDeadlinePassesIdentify(t *testing.T) {
 				return fmt.Errorf("setting id failed")
 			},
 		},
-		time.Microsecond,
+		time.Millisecond,
 	)
 
 	inputID := procwatch.DeviceID("xyz")
