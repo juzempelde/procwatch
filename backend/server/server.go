@@ -1,7 +1,7 @@
 package server
 
 import (
-	procwatch "github.com/juzempelde/procwatch/backend"
+	"github.com/juzempelde/procwatch/backend"
 	pwRPC "github.com/juzempelde/procwatch/backend/rpc"
 
 	"context"
