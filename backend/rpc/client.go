@@ -16,6 +16,8 @@ type caller interface {
 	Close() error
 }
 
+// Client communicates with a procwatch RPC server. The zero value is not useful.
+// Must be created with NewClient().
 type Client struct {
 	caller           caller
 	deadlineAcceptor deadlineAcceptor
@@ -31,6 +33,7 @@ func (acc nopDeadlineAcceptor) SetDeadline(t time.Time) error {
 	return nil
 }
 
+// NewClient creates a new client from an existing ReadWriteCloser.
 func NewClient(conn io.ReadWriteCloser) *Client {
 	client := &Client{
 		caller:           rpc.NewClient(conn),
@@ -50,6 +53,7 @@ func (client *Client) setDeadlineFromContext(ctx context.Context) error {
 	return client.deadlineAcceptor.SetDeadline(deadline)
 }
 
+// Identify sends an ID to the server which identifies this agent.
 func (client *Client) Identify(ctx context.Context, id procwatch.DeviceID) error {
 	client.setDeadlineFromContext(ctx)
 	request := &IdentificationRequest{
@@ -66,6 +70,7 @@ func (client *Client) Identify(ctx context.Context, id procwatch.DeviceID) error
 	return nil
 }
 
+// ProcessNamesFilter retrieves the filter for process names from the server.
 func (client *Client) ProcessNamesFilter(ctx context.Context) (procwatch.ProcessFilterNameList, error) {
 	client.setDeadlineFromContext(ctx)
 	request := ProcessNameFilterRequest{}
@@ -77,6 +82,7 @@ func (client *Client) ProcessNamesFilter(ctx context.Context) (procwatch.Process
 	return procwatch.ProcessFilterNameList(response.Names), nil
 }
 
+// Processes sends a list of processes to the server.
 func (client *Client) Processes(ctx context.Context, procs procwatch.Processes) error {
 	client.setDeadlineFromContext(ctx)
 	request := ProcessesRequest{
@@ -86,6 +92,7 @@ func (client *Client) Processes(ctx context.Context, procs procwatch.Processes) 
 	return client.caller.Call(fmt.Sprintf("%s.%s", processes, "Processes"), request, response)
 }
 
+// Close closes the connection to the RPC server.
 func (client *Client) Close() error {
 	return client.caller.Close()
 }
