@@ -35,6 +35,11 @@ func (agent *Agent) Run() error {
 		}
 	}
 
+	return agent.loop(hostID)
+}
+
+func (agent *Agent) loop(hostID string) error {
+	var err error
 	for {
 		var client AgentClient
 		client, err = agent.Connector.Connect()
