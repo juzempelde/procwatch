@@ -1,17 +1,17 @@
 all: procwatch procwatch-win
 
 procwatch:
-	go build -v -o procwatch ./backend/cmd/procwatch
+	cd backend; go build -v -o ../procwatch ./cmd/procwatch
 
 procwatch-win:
-	GOOS=windows GOARCH=386 go build -v -o procwatch_x86.exe ./backend/cmd/procwatch
-	GOOS=windows GOARCH=amd64 go build -v -o procwatch_amd64.exe ./backend/cmd/procwatch
+	cd backend; GOOS=windows GOARCH=386 go build -v -o ../procwatch_x86.exe ./cmd/procwatch
+	cd backend; GOOS=windows GOARCH=amd64 go build -v -o ../procwatch_amd64.exe ./cmd/procwatch
 
 test:
-	go test ./backend/...
+	cd backend; go test ./...
 
 test-cover:
-	go test -cover ./backend/...
+	cd backend; go test -cover ./...
 
 .PHONY: \
 	procwatch \
