@@ -52,21 +52,27 @@ func (agent *Agent) Run() error {
 			continue
 		}
 
-		for {
-			processNamesFilter, err := client.ProcessNamesFilter(context.TODO())
-			if err != nil {
-				agent.handleError(err)
-				break
-			}
+		agent.handleError(agent.sendProcesses(client))
+	}
+}
 
-			processes, err := agent.ProcessList.Current()
-			if err != nil {
-				agent.handleError(err)
-				break
-			}
-			agent.handleError(client.Processes(context.TODO(), processes.Filtered(processNamesFilter)))
-			time.Sleep(sleepInterval)
+func (agent *Agent) sendProcesses(client AgentClient) error {
+	for {
+		processNamesFilter, err := client.ProcessNamesFilter(context.TODO())
+		if err != nil {
+			return err
 		}
+
+		processes, err := agent.ProcessList.Current()
+		if err != nil {
+			return err
+		}
+
+		err = client.Processes(context.TODO(), processes.Filtered(processNamesFilter))
+		if err != nil {
+			return err
+		}
+		time.Sleep(sleepInterval)
 	}
 }
 
